@@ -1053,6 +1053,7 @@
 					"-ObjC",
 					"-lc++",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = br.com.bintechnology.mqttclient;
 				PRODUCT_NAME = MqttClient;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -1074,6 +1075,7 @@
 					"-ObjC",
 					"-lc++",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = br.com.bintechnology.mqttclient;
 				PRODUCT_NAME = MqttClient;
 				VERSIONING_SYSTEM = "apple-generic";
 			};

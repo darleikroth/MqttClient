@@ -1,4 +1,4 @@
-package com.mqttclient;
+package br.com.bintechnology.mqttclient;
 
 import com.facebook.react.ReactActivity;
 

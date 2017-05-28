@@ -1,12 +1,13 @@
 {
   "name": "MqttClient",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "test": "jest"
   },
   "dependencies": {
+    "moment": "^2.18.1",
     "react": "16.0.0-alpha.6",
     "react-native": "0.44.2",
     "react-native-elements": "^0.12.2",
