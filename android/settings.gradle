@@ -1,0 +1,5 @@
+rootProject.name = 'MqttClient'
+include ':react-native-mqtt'
+project(':react-native-mqtt').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-mqtt/android')
+
+include ':app'
