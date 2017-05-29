@@ -183,7 +183,6 @@ class App extends React.Component
             placeholderTextColor="#9E9E9E"
             underlineColorAndroid="#9E9E9E"
             returnKeyType="next"
-            keyboardType="numeric"
             onSubmitEditing={() => this.port.focus()}
           />
           <TextInput
