@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Platform,
   FlatList,
-  TouchableOpacity,
   AsyncStorage,
   Button,
 } from 'react-native';
@@ -47,7 +46,6 @@ class App extends React.Component
       firstConnection: true,
       connected: false,
       received: '1',
-      uri: '',
       host: '',
       port: '',
       subTopic: '',
@@ -59,12 +57,48 @@ class App extends React.Component
   componentDidMount = () =>
   {
     _status['mounted'] = true;
+    this.initialize();
   };
 
   componentWillUnmount = () =>
   {
     _status['mounted'] = false;
     this._disconnect();
+  };
+
+  initialize = async () =>
+  {
+    try {
+      const data = await AsyncStorage.getItem('config');
+      if (data !== null) {
+        let dd = JSON.parse(data);
+        this.setState({
+          host: dd.host,
+          port: dd.port,
+          subTopic: dd.subTopic,
+          pubTopic: dd.pubTopic
+        });
+        return;
+      }
+
+      await AsyncStorage.setItem('config', JSON.stringify({
+        host: '',
+        port: '',
+        subTopic: '',
+        pubTopic: ''
+      }));
+    }
+    catch (e) {
+      console.log('AsyncStorage', e)
+    }
+  };
+
+  _mergeItem = async (item) =>
+  {
+    try {
+      await AsyncStorage.mergeItem('config', JSON.stringify(item));
+    }
+    catch (e) {}
   };
 
   toggleConnection = async () =>
@@ -184,6 +218,7 @@ class App extends React.Component
             underlineColorAndroid="#9E9E9E"
             returnKeyType="next"
             onSubmitEditing={() => this.port.focus()}
+            onBlur={() => this._mergeItem({ host: this.state.host })}
           />
           <TextInput
             ref={c => this.port = c}
@@ -197,6 +232,7 @@ class App extends React.Component
             returnKeyType="next"
             keyboardType="numeric"
             onSubmitEditing={() => this.sub.focus()}
+            onBlur={() => this._mergeItem({ port: this.state.port })}
           />
           <TextInput
             ref={c => this.sub = c}
@@ -209,6 +245,7 @@ class App extends React.Component
             underlineColorAndroid="#9E9E9E"
             returnKeyType="next"
             onSubmitEditing={() => this.pub.focus()}
+            onBlur={() => this._mergeItem({ subTopic: this.state.subTopic })}
           />
           <TextInput
             ref={c => this.pub = c}
@@ -220,6 +257,7 @@ class App extends React.Component
             placeholderTextColor="#9E9E9E"
             underlineColorAndroid="#9E9E9E"
             returnKeyType="done"
+            onBlur={() => this._mergeItem({ pubTopic: this.state.pubTopic })}
           />
           <TextInput
             value={this.state.value}
