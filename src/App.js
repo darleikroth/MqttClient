@@ -165,7 +165,7 @@ class App extends React.Component
 
   onReceiveMessage = (msg) =>
   {
-    if (msg.topic === this.state.subTopic && msg.data !== this.state.received) {
+    if (msg.topic === this.state.subTopic && msg.data) {
       let data = this.state.data;
       data.unshift({
         data: msg.data,
