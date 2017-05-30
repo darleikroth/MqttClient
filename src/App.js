@@ -9,9 +9,16 @@ import {
   FlatList,
   AsyncStorage,
   Button,
+  Picker,
+  Switch,
+  TouchableOpacity,
 } from 'react-native';
 import moment from 'moment';
 import mqtt from 'react-native-mqtt';
+
+const getRandomInt = (value) => {
+  return `${(Math.floor(Math.random() * value) + 412)}_${value}`;
+};
 
 const ios = Platform.OS === 'ios';
 const styles = StyleSheet.create({
@@ -51,6 +58,8 @@ class App extends React.Component
       subTopic: '',
       pubTopic: '',
       value: '',
+      qos: "2",
+      retain: false,
     };
   }
 
@@ -118,7 +127,7 @@ class App extends React.Component
     that.client = await mqtt.createClient({
       host: this.state.host,
       port: Number(this.state.port),
-      clientId: 'your_client_id'
+      clientId: 'id:' + getRandomInt(moment().valueOf())
     });
 
     that.client.on('closed', function() {
@@ -185,7 +194,14 @@ class App extends React.Component
 
   sendData = () =>
   {
-    this.client.publish(this.state.pubTopic, this.state.value, 0, false);
+    if (this.client) {
+      this.client.publish(
+        this.state.pubTopic,
+        this.state.value,
+        Number(this.state.qos),
+        this.state.retain,
+      );
+    }
   };
 
   render = () =>
@@ -208,81 +224,99 @@ class App extends React.Component
         <View style={styles.divider} />
 
         <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
-          <TextInput
-            value={this.state.host}
-            onChangeText={(text) => this.setState({ host: text })}
-            autoCapitalize="none"
-            autoCorrect={false}
-            placeholder="Host"
-            placeholderTextColor="#9E9E9E"
-            underlineColorAndroid="#9E9E9E"
-            returnKeyType="next"
-            onSubmitEditing={() => this.port.focus()}
-            onBlur={() => this._mergeItem({ host: this.state.host })}
-          />
-          <TextInput
-            ref={c => this.port = c}
-            value={this.state.port}
-            onChangeText={(text) => this.setState({ port: text })}
-            autoCapitalize="none"
-            autoCorrect={false}
-            placeholder="Port"
-            placeholderTextColor="#9E9E9E"
-            underlineColorAndroid="#9E9E9E"
-            returnKeyType="next"
-            keyboardType="numeric"
-            onSubmitEditing={() => this.sub.focus()}
-            onBlur={() => this._mergeItem({ port: this.state.port })}
-          />
-          <TextInput
-            ref={c => this.sub = c}
-            value={this.state.subTopic}
-            onChangeText={(text) => this.setState({ subTopic: text })}
-            autoCapitalize="none"
-            autoCorrect={false}
-            placeholder="Topic to subscribe"
-            placeholderTextColor="#9E9E9E"
-            underlineColorAndroid="#9E9E9E"
-            returnKeyType="next"
-            onSubmitEditing={() => this.pub.focus()}
-            onBlur={() => this._mergeItem({ subTopic: this.state.subTopic })}
-          />
-          <TextInput
-            ref={c => this.pub = c}
-            value={this.state.pubTopic}
-            onChangeText={(text) => this.setState({ pubTopic: text })}
-            autoCapitalize="none"
-            autoCorrect={false}
-            placeholder="Topic to publish"
-            placeholderTextColor="#9E9E9E"
-            underlineColorAndroid="#9E9E9E"
-            returnKeyType="done"
-            onBlur={() => this._mergeItem({ pubTopic: this.state.pubTopic })}
-          />
-          <TextInput
-            value={this.state.value}
-            onChangeText={(text) => this.setState({ value: text })}
-            autoCapitalize="none"
-            autoCorrect={false}
-            placeholder="Value to send"
-            placeholderTextColor="#9E9E9E"
-            underlineColorAndroid="#9E9E9E"
-            returnKeyType="done"
-          />
+          <View style={{ flexDirection: 'row' }}>
+            <TextInput
+              style={{ flex: 5 }}
+              value={this.state.host}
+              onChangeText={(text) => this.setState({ host: text })}
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholder="Host"
+              placeholderTextColor="#9E9E9E"
+              underlineColorAndroid="#9E9E9E"
+              returnKeyType="next"
+              selectTextOnFocus
+              onSubmitEditing={() => this.port.focus()}
+              onBlur={() => this._mergeItem({ host: this.state.host })}
+            />
+            <TextInput
+              style={{ flex: 2 }}
+              ref={c => this.port = c}
+              value={this.state.port}
+              onChangeText={(text) => this.setState({ port: text })}
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholder="Port"
+              placeholderTextColor="#9E9E9E"
+              underlineColorAndroid="#9E9E9E"
+              returnKeyType="next"
+              keyboardType="numeric"
+              selectTextOnFocus
+              onSubmitEditing={() => this.sub.focus()}
+              onBlur={() => this._mergeItem({ port: this.state.port })}
+            />
+          </View>
+          <View style={{ flexDirection: 'row' }}>
+            <TextInput
+              style={{ flex: 1 }}
+              ref={c => this.sub = c}
+              value={this.state.subTopic}
+              onChangeText={(text) => this.setState({ subTopic: text })}
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholder="Topic to subscribe"
+              placeholderTextColor="#9E9E9E"
+              underlineColorAndroid="#9E9E9E"
+              returnKeyType="next"
+              selectTextOnFocus
+              onSubmitEditing={() => this.pub.focus()}
+              onBlur={() => this._mergeItem({ subTopic: this.state.subTopic })}
+            />
+            <TextInput
+              style={{ flex: 1 }}
+              ref={c => this.pub = c}
+              value={this.state.pubTopic}
+              onChangeText={(text) => this.setState({ pubTopic: text })}
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholder="Topic to publish"
+              placeholderTextColor="#9E9E9E"
+              underlineColorAndroid="#9E9E9E"
+              returnKeyType="done"
+              selectTextOnFocus
+              onBlur={() => this._mergeItem({ pubTopic: this.state.pubTopic })}
+            />
+          </View>
+          {this.renderSelects()}
+          <View style={{ flexDirection: 'row', marginTop: 8 }}>
+            <TextInput
+              style={{ flex: 5 }}
+              value={this.state.value}
+              onChangeText={(text) => this.setState({ value: text })}
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholder="Value to send"
+              placeholderTextColor="#9E9E9E"
+              underlineColorAndroid="#9E9E9E"
+              returnKeyType="send"
+              selectTextOnFocus
+              onSubmitEditing={() => this.sendData()}
+            />
+            <View style={{ flex: 2 }}>
+              <Button
+                title='Send'
+                color="mediumseagreen"
+                onPress={() => this.sendData()}
+                disabled={!this.state.connected}
+              />
+            </View>
+          </View>
 
           <Button
             title={this.state.connected ? 'Disconnect' : 'Connect'}
             onPress={() => this.toggleConnection()}
             disabled={disable}
           />
-          <View style={{ height: 8 }} />
-          <Button
-            title='Send'
-            color="mediumseagreen"
-            onPress={() => this.sendData()}
-            disabled={!this.state.connected}
-          />
-
         </View>
 
         <FlatList
@@ -312,6 +346,36 @@ class App extends React.Component
   {
     return (
       <View style={styles.header}/>
+    );
+  };
+
+  renderSelects = () =>
+  {
+    return (
+      <View style={{ flexDirection: 'row', height: 48, alignItems: 'center', marginLeft: 4 }}>
+        <View style={{ flex: 5 }}>
+          <TouchableOpacity activeOpacity={0.6} onPress={() => this.setState(prev => ({ retain: !prev.retain }))}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text>Retain on server</Text>
+              <Switch
+                style={{ marginLeft: 8 }}
+                onValueChange={retain => this.setState({ retain })}
+                value={this.state.retain}
+              />
+            </View>
+          </TouchableOpacity>
+        </View>
+        <View style={{ flex: 3 }}>
+          <Picker
+            mode="dropdown"
+            selectedValue={this.state.qos}
+            onValueChange={qos => this.setState({ qos })}>
+            <Picker.Item label="qos 0" value="0" />
+            <Picker.Item label="qos 1" value="1" />
+            <Picker.Item label="qos 2" value="2" />
+          </Picker>
+        </View>
+      </View>
     );
   };
 }
