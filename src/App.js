@@ -57,6 +57,8 @@ class App extends React.Component
       port: '',
       subTopic: '',
       pubTopic: '',
+      user: '',
+      pass: '',
       value: '',
       qos: "2",
       retain: false,
@@ -85,7 +87,12 @@ class App extends React.Component
           host: dd.host,
           port: dd.port,
           subTopic: dd.subTopic,
-          pubTopic: dd.pubTopic
+          pubTopic: dd.pubTopic,
+          user: dd.user || '',
+          pass: dd.pass || '',
+          qos: dd.qos || '2',
+          retain: dd.retain || false,
+          value: dd.value || '',
         });
         return;
       }
@@ -94,7 +101,12 @@ class App extends React.Component
         host: '',
         port: '',
         subTopic: '',
-        pubTopic: ''
+        pubTopic: '',
+        user: '',
+        pass: '',
+        qos: '2',
+        retain: false,
+        value: '',
       }));
     }
     catch (e) {
@@ -127,7 +139,9 @@ class App extends React.Component
     that.client = await mqtt.createClient({
       host: this.state.host,
       port: Number(this.state.port),
-      clientId: 'id:' + getRandomInt(moment().valueOf())
+      clientId: 'id:' + getRandomInt(moment().valueOf()),
+      user: this.state.user || null,
+      pass: this.state.pass || null,
     });
 
     that.client.on('closed', function() {
@@ -284,7 +298,38 @@ class App extends React.Component
               underlineColorAndroid="#9E9E9E"
               returnKeyType="done"
               selectTextOnFocus
+              onSubmitEditing={() => this.user.focus()}
               onBlur={() => this._mergeItem({ pubTopic: this.state.pubTopic })}
+            />
+          </View>
+          <View style={{ flexDirection: 'row' }}>
+            <TextInput
+              style={{ flex: 1 }}
+              ref={c => this.user = c}
+              value={this.state.user}
+              onChangeText={(text) => this.setState({ user: text })}
+              autoCapitalize="none"
+              placeholder="User"
+              placeholderTextColor="#9E9E9E"
+              underlineColorAndroid="#9E9E9E"
+              returnKeyType="next"
+              selectTextOnFocus
+              onSubmitEditing={() => this.pass.focus()}
+              onBlur={() => this._mergeItem({ user: this.state.user })}
+            />
+            <TextInput
+              style={{ flex: 1 }}
+              ref={c => this.pass = c}
+              value={this.state.pass}
+              onChangeText={(text) => this.setState({ pass: text })}
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholder="Pass"
+              placeholderTextColor="#9E9E9E"
+              underlineColorAndroid="#9E9E9E"
+              returnKeyType="done"
+              selectTextOnFocus
+              onBlur={() => this._mergeItem({ pass: this.state.pass })}
             />
           </View>
           {this.renderSelects()}
@@ -301,6 +346,7 @@ class App extends React.Component
               returnKeyType="send"
               selectTextOnFocus
               onSubmitEditing={() => this.sendData()}
+              onBlur={() => this._mergeItem({ value: this.state.value })}
             />
             <View style={{ flex: 2 }}>
               <Button
@@ -359,7 +405,10 @@ class App extends React.Component
               <Text>Retain on server</Text>
               <Switch
                 style={{ marginLeft: 8 }}
-                onValueChange={retain => this.setState({ retain })}
+                onValueChange={retain => {
+                  this._mergeItem({ retain });
+                  this.setState({ retain });
+                }}
                 value={this.state.retain}
               />
             </View>
@@ -369,7 +418,10 @@ class App extends React.Component
           <Picker
             mode="dropdown"
             selectedValue={this.state.qos}
-            onValueChange={qos => this.setState({ qos })}>
+            onValueChange={qos => {
+              this._mergeItem({ qos });
+              this.setState({ qos });
+            }}>
             <Picker.Item label="qos 0" value="0" />
             <Picker.Item label="qos 1" value="1" />
             <Picker.Item label="qos 2" value="2" />
