@@ -5,6 +5,7 @@ import {
   TextInput,
   ScrollView,
   StyleSheet,
+  StatusBar,
   Platform,
   FlatList,
   AsyncStorage,
@@ -68,6 +69,9 @@ class App extends React.Component
   componentDidMount = () =>
   {
     _status['mounted'] = true;
+    if (!ios) {
+      StatusBar.setBackgroundColor('black', true);
+    }
     this.initialize();
   };
 
@@ -122,15 +126,10 @@ class App extends React.Component
     catch (e) {}
   };
 
-  toggleConnection = async () =>
+   async toggleConnection()
   {
     if (this.state.connected) {
       this._disconnect();
-      return;
-    }
-
-    if (!this.state.firstConnection) {
-      this._connect();
       return;
     }
 
@@ -140,8 +139,10 @@ class App extends React.Component
       host: this.state.host,
       port: Number(this.state.port),
       clientId: 'id:' + getRandomInt(moment().valueOf()),
-      user: this.state.user || null,
-      pass: this.state.pass || null,
+      user: this.state.user || undefined,
+      pass: this.state.pass || undefined,
+      auth: true,
+      keepalive: 60,
     });
 
     that.client.on('closed', function() {
@@ -175,7 +176,7 @@ class App extends React.Component
     });
 
     that.client.connect();
-  };
+  }
 
   onReceiveMessage = (msg) =>
   {
